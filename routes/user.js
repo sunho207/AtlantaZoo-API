@@ -17,16 +17,54 @@ connection.connect(function(err) {
   console.log('connected as id ' + connection.threadId);
 });
 
-/* GET users listing. */
 router.get('/', function(req, res, next) {
-  connection.query('SELECT * FROM ANIMAL', function (error, results, fields) {
+  var username = req.params.username;
+  var password = req.params.password;
+
+  // connection.query('SELECT * FROM USERS WHERE Username=' + username + 'AND Password=' + password, function (error, results, fields) {
+
+  connection.query('SELECT * FROM USERS', function (error, results, fields) {
     if (error) {
       console.log(error)
       res.status(400)
     } else {
-      res.json(results)
+      // const result = [{
+      //   "username" : res[0].Username,
+      //   "email" : res[0].Email,
+      //   "role" : res[0].Role
+      // }];
+      res.json(res)
     }
   })
 });
+
+// router.post('/', function(req, res, next) {
+
+//   var username = req.params.username;
+//   var email = req.params.email;
+//   var password = req.params.password;
+//   var role = req.params.role;
+
+//   // connection.query('SELECT * FROM USERS WHERE Username=' + username + 'AND Password=' + password, function (error, results, fields) {
+
+//   connection.query('INSERT INTO USERS (Username, Email, Password, Role) VALUES(${username}, ${email}, ${password}, ${role})', function (error, results, fields) {
+//     if (error) {
+//       console.log(error)
+//       res.status(400)
+//       response = {
+//         'success': False
+//       };
+//       res.json(response)
+//     } else {
+//       response = {
+//         'success': True
+//       }; 
+//       res.json(response)
+//     }
+//   })
+// });
+
+// Maybe we should delete all users using this instead of having a delete for visitor/staff
+// router.delete(...)
 
 module.exports = router;
