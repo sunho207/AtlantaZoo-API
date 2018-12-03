@@ -18,51 +18,42 @@ connection.connect(function(err) {
 });
 
 router.get('/', function(req, res, next) {
-  var username = req.params.username;
-  var password = req.params.password;
+  var email = req.query.email;
+  var password = req.query.password;
 
-  // connection.query('SELECT * FROM USERS WHERE Username=' + username + 'AND Password=' + password, function (error, results, fields) {
-
-  connection.query('SELECT * FROM USERS', function (error, results, fields) {
+  connection.query(`SELECT * FROM USERS WHERE Email='${email}' AND Password='${password}'`, function (error, results, fields) {
     if (error) {
       console.log(error)
       res.status(400)
     } else {
-      // const result = [{
-      //   "username" : res[0].Username,
-      //   "email" : res[0].Email,
-      //   "role" : res[0].Role
-      // }];
-      res.json(res)
+      res.json(results[0])
     }
   })
 });
 
-// router.post('/', function(req, res, next) {
+router.post('/', function(req, res, next) {
 
-//   var username = req.params.username;
-//   var email = req.params.email;
-//   var password = req.params.password;
-//   var role = req.params.role;
+  var username = req.body.username;
+  var email = req.body.email;
+  var password = req.body.password;
+  var role = req.body.role;
 
-//   // connection.query('SELECT * FROM USERS WHERE Username=' + username + 'AND Password=' + password, function (error, results, fields) {
-
-//   connection.query('INSERT INTO USERS (Username, Email, Password, Role) VALUES(${username}, ${email}, ${password}, ${role})', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//       response = {
-//         'success': False
-//       };
-//       res.json(response)
-//     } else {
-//       response = {
-//         'success': True
-//       }; 
-//       res.json(response)
-//     }
-//   })
-// });
+  connection.query(`INSERT INTO USERS (Username, Email, Password, Role) VALUES('${username}', '${email}', '${password}', '${role}')`, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+      response = {
+        'success': false
+      };
+      res.json(response)
+    } else {
+      response = {
+        'success': true
+      }; 
+      res.json(response)
+    }
+  })
+});
 
 // Maybe we should delete all users using this instead of having a delete for visitor/staff
 // router.delete(...)
