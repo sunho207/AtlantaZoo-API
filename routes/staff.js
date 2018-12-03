@@ -18,7 +18,12 @@ connection.connect(function(err) {
 });
 
 router.get('/', function(req, res, next) {
-  connection.query('SELECT * FROM VIEW_STAFF', function (error, results, fields) {
+  var sort_field = req.query.sort_field
+  var sort_direction = req.query.sort_direction
+  
+  connection.query(`SELECT * FROM VIEW_STAFF
+        ${ sort_field && sort_direction ? `ORDER BY ${sort_field} ${sort_direction}` : ''}
+      `, function (error, results, fields) {
     if (error) {
       console.log(error)
       res.status(400)
@@ -28,18 +33,24 @@ router.get('/', function(req, res, next) {
   })
 });
 
-// router.get('/shows', function(req, res, next) {
+router.get('/shows', function(req, res, next) {
 
-//   var userID = req.params.user_id;
+  var username = req.query.username;
+  var sort_field = req.query.sort_field
+  var sort_direction = req.query.sort_direction
 
-//   connection.query('SELECT * FROM STAFF_SHOWHIST WHERE Username = ${userID}', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//     } else {
-//       res.json(results)
-//     }
-//   })
-// });
+  connection.query(`SELECT * FROM STAFF_SHOWHIST
+        WHERE Username = '${username}'
+        ${ sort_field && sort_direction ? `ORDER BY ${sort_field} ${sort_direction}` : ''}
+      `, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+    } else {
+      console.log(results)
+      res.json(results)
+    }
+  })
+});
 
 module.exports = router;

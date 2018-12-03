@@ -17,43 +17,45 @@ connection.connect(function(err) {
   console.log('connected as id ' + connection.threadId);
 });
 
-// router.get('/', function(req, res, next) {
+router.get('/', function(req, res, next) {
+  var exhibit = req.query.name;
 
-//   var exhibitID = req.params.exhibit_id;
+  connection.query(`SELECT * FROM EXHIBIT WHERE NAME='${exhibit}'`, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+    } else {
+      res.json(results[0])
+    }
+  })
+});
 
-//   connection.query('SELECT * FROM EXHIBIT WHERE NAME=$(exhibitID)', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//     } else {
-//       res.json(results)
-//     }
-//   })
-// });
+router.post('/log', function(req, res, next) {
 
-// router.post('/log', function(req, res, next) {
+  var username = req.body.username;
+  var name = req.body.name;
+  var date = req.body.date;
+  var sort_field = req.query.sort_field
+  var sort_direction = req.query.sort_direction
 
-//   var userID = req.params.user_id;
-//   var exhibitID = req.params.exhibit_id;
-//   var date = req.params.date;
-
-//   // connection.query('SELECT * FROM USERS WHERE Username=' + username + 'AND Password=' + password, function (error, results, fields) {
-
-//   connection.query('INSERT INTO VISITS_EXHIBIT (Vuser, Ename, Date_time) VALUES(${userID}, ${exhibitID}, ${date})', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//       response = {
-//         'success': False
-//       };
-//       res.json(response)
-//     } else {
-//       response = {
-//         'success': True
-//       }; 
-//       res.json(response)
-//     }
-//   })
-// });
+  connection.query(`INSERT INTO VISITS_EXHIBIT (Vuser, Ename, Date_time) VALUES(
+        '${username}', '${name}', '${date}')
+        ${ sort_field && sort_direction ? `ORDER BY ${sort_field} ${sort_direction}` : ''}
+      `, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+      response = {
+        'success': false
+      };
+      res.json(response)
+    } else {
+      response = {
+        'success': true
+      }; 
+      res.json(response)
+    }
+  })
+});
 
 module.exports = router;

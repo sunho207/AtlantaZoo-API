@@ -18,26 +18,32 @@ connection.connect(function(err) {
 });
 
 
-// router.get('/', function(req, res, next) {
+router.get('/', function(req, res, next) {
 
-//   var exhibitID = req.params.exhibit_id;
-//   var name = req.params.name;
-//   var ageMin = req.params.age_min;
-//   var ageMax = req.params.age_max;
-//   var species = req.params.species;
-//   var type = req.params.type;
-//   var sort = req.params.sort;
+  var name = req.query.name;
+  var ageMin = req.query.age_min;
+  var ageMax = req.query.age_max;
+  var species = req.query.species;
+  var exhibit = req.query.exhibit;
+  var type = req.query.type;
+  var sort_field = req.query.sort_field
+  var sort_direction = req.query.sort_direction
 
-//   //have to sort?
-
-//   connection.query('SELECT * FROM ANIMAL_SEARCH WHERE Name LIKE ${name} AND Species LIKE ${species} AND Age BETWEEN (${ageMin} AND ${ageMax}) AND Exhibit LIKE ${exhibitID}', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//     } else {
-//       res.json(results)
-//     }
-//   })
-// });
+  connection.query(`SELECT * FROM ANIMAL_SEARCH WHERE
+        Name LIKE '${name ? name : '%'}'
+        AND Species LIKE '${species ? species : '%'}'
+        ${ageMin && ageMax ? `AND Age BETWEEN ${ageMin} AND ${ageMax}` : ''}
+        AND Exhibit LIKE '${exhibit ? exhibit : '%'}'
+        ${type ? `AND Type='${type}'` : ''}
+        ${ sort_field && sort_direction ? `ORDER BY ${sort_field} ${sort_direction}` : ''}
+      `, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+    } else {
+      res.json(results)
+    }
+  })
+});
 
 module.exports = router;

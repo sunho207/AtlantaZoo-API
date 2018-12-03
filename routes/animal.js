@@ -17,89 +17,130 @@ connection.connect(function(err) {
   console.log('connected as id ' + connection.threadId);
 });
 
-// router.get('/', function(req, res, next) {
+router.get('/', function(req, res, next) {
 
-//   var animalID = req.params.animal_id;
-//   // also have to check species??
+  var name = req.query.name;
+  var species = req.query.species;
 
-//   connection.query('SELECT * FROM ANIMAL_DETAIL WHERE Name=${animalID}', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//     } else {
-//       res.json(results)
-//     }
-//   })
-// });
+  connection.query(`SELECT * FROM ANIMAL_DETAIL
+    WHERE Name='${name ? name : '%'}'
+    AND Species='${species ? species : '%'}'`, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+    } else {
+      res.json(results[0])
+    }
+  })
+});
 
 
-// router.post('/', function(req, res, next) {
+router.post('/', function(req, res, next) {
 
-//   var name = req.params.name;
-//   // Update exhibit here too?
-//   var exhibitID = req.params.exhibit_id;
-//   var species = req.params.species;
-//   var type = req.params.type;
-//   var age = req.params.age;
+  var name = req.body.name;
+  var exhibit = req.body.exhibit;
+  var species = req.body.species;
+  var type = req.body.type;
+  var age = req.body.age;
 
-//   connection.query('INSERT INTO ANIMAL (Name, Species, Age, Type) VALUES(${name}, ${species}, ${type}, ${age})', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//       response = {
-//         'success': False
-//       };
-//       res.json(response)
-//     } else {
-//       response = {
-//         'success': True
-//       }; 
-//       res.json(response)
-//     }
-//   })
-// });
+  connection.query(`INSERT INTO ANIMAL (Name, Species, Age, Type) VALUES(
+        '${name}', '${species}', '${age}', '${type}')
+      `, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+      response = {
+        'success': false
+      };
+      res.json(response)
+    } else {
+      connection.query(`INSERT INTO LIVES_IN (Aname, Aspecies, Ename) VALUES(
+            '${name}', '${species}', '${exhibit}')
+          `, function (error, results, fields) {
+        if (error) {
+          console.log(error)
+          res.status(400)
+          response = {
+            'success': false
+          };
+          res.json(response)
+        } else {
+          response = {
+            'success': true
+          }; 
+          res.json(response)
+        }
+      })
+    }
+  })
+});
 
-// router.get('/care', function(req, res, next) {
+router.delete('/:species/:name', function(req, res, next) {
+  var species = req.params.species;
+  var name = req.params.name;
+  connection.query(`DELETE FROM ANIMAL WHERE Name='${name}' AND Species='${species}'`, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+    } else {
+      response = {
+        'success': true
+      };
+      res.json(response)
+    }
+  })
+});
 
-//   //need name and species based on the google doc query
+router.get('/care', function(req, res, next) {
 
-//   connection.query('SELECT * FROM ANIMAL_NOTE WHERE Name = $Name AND Species = $Species', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//     } else {
-//       res.json(results)
-//     }
-//   })
-// });
+  var name = req.query.name
+  var species = req.query.species;
+  var sort_field = req.query.sort_field
+  var sort_direction = req.query.sort_direction
 
-// router.post('/care', function(req, res, next) {
+  if (sort_field == 'staff') {
+    sort_field = 'Staff_Member'
+  }
 
-//   var userID = req.params.user_id;
-//   var animalID = req.params.animal_id;
-//   var note = req.params.note;
-//   var date = req.params.date;
+  connection.query(`SELECT * FROM ANIMAL_NOTE
+        WHERE Name LIKE '${name ? name : '%'}'
+        AND Species LIKE '${species ? species : '%'}'
+        ${ sort_field && sort_direction ? `ORDER BY ${sort_field} ${sort_direction}` : ''}
+      `, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+    } else {
+      console.log(results)
+      res.json(results)
+    }
+  })
+});
 
-//   connection.query('INSERT INTO NOTE (Aname, Aspecies, Suser, Note, Date_time) VALUES(${userID}, ${animalID}, ${note}, ${date})', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//       response = {
-//         'success': False
-//       };
-//       res.json(response)
-//     } else {
-//       response = {
-//         'success': True
-//       }; 
-//       res.json(response)
-//     }
-//   })
-// });
+router.post('/care', function(req, res, next) {
 
-// delete animal
-// router.delte(...)
-// DELETE * FROM ANIMAL WHERE Name = $Name AND Species = $Species
+  var username = req.body.username;
+  var name = req.body.name;
+  var species = req.body.species;
+  var note = req.body.note;
+  var date = req.body.date;
 
+  connection.query(`INSERT INTO NOTE (Aname, Aspecies, Suser, Note, Date_time) VALUES(
+      '${name}', '${species}', '${username}', '${note}', '${date}')`, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+      response = {
+        'success': false
+      };
+      res.json(response)
+    } else {
+      response = {
+        'success': true
+      }; 
+      res.json(response)
+    }
+  })
+});
 
 module.exports = router;

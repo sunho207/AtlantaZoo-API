@@ -19,9 +19,12 @@ connection.connect(function(err) {
 
 router.get('/', function(req, res, next) {
 
-  // sort/order?
+  var sort_field = req.query.sort_field
+  var sort_direction = req.query.sort_direction
 
-  connection.query('SELECT * FROM VIEW_VISITORS', function (error, results, fields) {
+  connection.query(`SELECT * FROM VIEW_VISITORS
+        ${ sort_field && sort_direction ? `ORDER BY ${sort_field} ${sort_direction}` : ''}
+      `, function (error, results, fields) {
     if (error) {
       console.log(error)
       res.status(400)

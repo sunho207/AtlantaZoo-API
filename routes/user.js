@@ -25,8 +25,24 @@ router.get('/', function(req, res, next) {
     if (error) {
       console.log(error)
       res.status(400)
+      response = {
+        'success': false
+      };
+      res.json(response)
     } else {
-      res.json(results[0])
+      if (results[0]) {
+        res.json({
+          username: results[0].Username,
+          email: results[0].Email,
+          role: results[0].Role
+        })
+      } else {
+        res.status(400)
+        response = {
+          'success': false
+        };
+        res.json(response)
+      }
     }
   })
 });
@@ -47,15 +63,71 @@ router.post('/', function(req, res, next) {
       };
       res.json(response)
     } else {
+      if (role == 'staff') {
+        connection.query(`INSERT INTO STAFF (Username) VALUES('${username}')`, function (error, results, fields) {
+          if (error) {
+            console.log(error)
+            res.status(400)
+            response = {
+              'success': false
+            };
+            res.json(response)
+          } else {
+            response = {
+              'success': true
+            };
+            res.json(response)
+          }
+        })
+      } else {
+        connection.query(`INSERT INTO VISITOR (Username) VALUES('${username}')`, function (error, results, fields) {
+          if (error) {
+            console.log(error)
+            res.status(400)
+            response = {
+              'success': false
+            };
+            res.json(response)
+          } else {
+            response = {
+              'success': true
+            };
+            res.json(response)
+          }
+        })
+      }
+    }
+  })
+});
+
+router.delete('/visitor/:username', function(req, res, next) {
+  var username = req.params.username;
+  connection.query(`DELETE FROM VISITOR WHERE Username='${username}'`, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+    } else {
       response = {
         'success': true
-      }; 
+      };
       res.json(response)
     }
   })
 });
 
-// Maybe we should delete all users using this instead of having a delete for visitor/staff
-// router.delete(...)
+router.delete('/staff/:username', function(req, res, next) {
+  var username = req.params.username;
+  connection.query(`DELETE FROM STAFF WHERE Username='${username}'`, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+    } else {
+      response = {
+        'success': true
+      };
+      res.json(response)
+    }
+  })
+});
 
 module.exports = router;

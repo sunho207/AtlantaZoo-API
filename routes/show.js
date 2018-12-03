@@ -17,59 +17,94 @@ connection.connect(function(err) {
   console.log('connected as id ' + connection.threadId);
 });
 
-// router.post('/', function(req, res, next) {
+router.post('/', function(req, res, next) {
 
-//   var name = req.params.name;
-//   var exhibitID = req.params.exhibit_id;
-//   var userID = req.params.user_id;
-//   var date = req.params.date;
+  var name = req.body.name;
+  var exhibit = req.body.exhibit;
+  var username = req.body.username;
+  var date = req.body.date;
 
-//   connection.query('INSERT INTO SHOWS (Name, Date_time) VALUES(${name}, ${date})', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//       response = {
-//         'success': False
-//       };
-//       res.json(response)
-//     } else {
-//       response = {
-//         'success': True
-//       }; 
-//       res.json(response)
-//     }
-//   })
-// });
+  connection.query(`INSERT INTO SHOWS (Name, Date_time) VALUES(
+      '${name}', '${date}')`, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+      response = {
+        'success': false
+      };
+      res.json(response)
+    } else {
+      connection.query(`INSERT INTO HOSTS (Suser, Sname, Date_time) VALUES(
+          '${username}', '${name}', '${date}')`, function (error, results, fields) {
+        if (error) {
+          console.log(error)
+          res.status(400)
+          response = {
+            'success': false
+          };
+          res.json(response)
+        } else {
+          connection.query(`INSERT INTO LOCATED_IN (Sname, Date_time, Ename) VALUES(
+              '${name}', '${date}', '${exhibit}')`, function (error, results, fields) {
+            if (error) {
+              console.log(error)
+              res.status(400)
+              response = {
+                'success': false
+              };
+              res.json(response)
+            } else {
+              response = {
+                'success': true
+              };
+              res.json(response)
+            }
+          })
+        }
+      })
+    }
+  })
+});
 
-// router.post('/log', function(req, res, next) {
+router.delete('/:name/:date', function(req, res, next) {
+  var name = req.params.name;
+  var date = req.params.date;
+  connection.query(`DELETE FROM SHOWS WHERE Name='${name}' AND Date_time='${date}'`, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+    } else {
+      response = {
+        'success': true
+      };
+      res.json(response)
+    }
+  })
+});
 
-//   var userID = req.params.user_id;
-//   var showID = req.params.show_id;
-//   var date = req.params.date;
+router.post('/log', function(req, res, next) {
 
-//   // connection.query('SELECT * FROM USERS WHERE Username=' + username + 'AND Password=' + password, function (error, results, fields) {
+  var username = req.body.username;
+  var name = req.body.name;
+  var date = req.body.date;
 
-//   connection.query('INSERT INTO VISITS_SHOW (Vuser, Sname, Date_time) VALUES(${userID}, ${showID}, ${date})', function (error, results, fields) {
-//     if (error) {
-//       console.log(error)
-//       res.status(400)
-//       response = {
-//         'success': False
-//       };
-//       res.json(response)
-//     } else {
-//       response = {
-//         'success': True
-//       }; 
-//       res.json(response)
-//     }
-//   })
-// });
-
-// delete show
-// router.delete(..)
-// DELETE * FROM SHOW WHERE Name = $Name AND Date = $Date
-
-
+  connection.query(`INSERT INTO VISITS_SHOW (Vuser, Sname, Date_time) VALUES(
+        '${username}', '${name}', '${date}')
+      `, function (error, results, fields) {
+    if (error) {
+      console.log(error)
+      res.status(400)
+      response = {
+        'success': false
+      };
+      res.json(response)
+    } else {
+      response = {
+        'success': true
+      }; 
+      res.json(response)
+    }
+  })
+});
 
 module.exports = router;
